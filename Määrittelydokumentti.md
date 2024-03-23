@@ -17,3 +17,7 @@ Toteutuksen testaamiseksi käytetään valmista konvoluutioneuroverkko toteutust
 ## Tavoitteet
 
 Tavoitteena on toteuttaa yksinkertainen konvoluutioneuroverkko, joka pystyy tunnistamaan kappaleen tanssilajin. Tämän jälkeen vertaillaan valmiin toteutuksen ja itse toteutetun konvoluutioneuroverkon suorituskykyä.
+
+## Toteutus
+
+Malli koulutettaan kappaleilla, joista muodostetaan spektogrammit ja ne prosessoidaan niin, että korostavat rytmin eri osia. Nämä spektogrammit syötettään konvoluutio neuroverkolle, joka oppii tunnistamaan tanssilajin spektogrammin ominaisuuksien perusteella.
