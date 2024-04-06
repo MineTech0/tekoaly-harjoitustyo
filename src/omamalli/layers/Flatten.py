@@ -1,4 +1,4 @@
-from BaseLayer import BaseLayer
+from .BaseLayer import BaseLayer
 
 class Flatten(BaseLayer):
     def forward(self, input_array):

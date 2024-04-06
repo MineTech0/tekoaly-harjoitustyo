@@ -1,5 +1,5 @@
 import numpy as np
-from BaseLayer import BaseLayer
+from .BaseLayer import BaseLayer
 
 class ReLU(BaseLayer):
     def forward(self, input_array: np.ndarray) -> np.ndarray:

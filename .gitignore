@@ -1,2 +1,3 @@
 src/vertaismalli/.ipynb_checkpoints/malli-checkpoint.ipynb
 data*
+__pycache__
