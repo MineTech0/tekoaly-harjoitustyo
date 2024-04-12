@@ -2,7 +2,7 @@ import numpy as np
 from .BaseLayer import BaseLayer
 
 class ReLU(BaseLayer):
-    def forward(self, input_array: np.ndarray) -> np.ndarray:
+    def forward(self, input_array: np.ndarray, training=False) -> np.ndarray:
         self.input = input_array
         self.output = np.maximum(0, input_array)
         return self.output

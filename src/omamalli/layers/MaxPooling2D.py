@@ -2,13 +2,13 @@ import numpy as np
 from .BaseLayer import BaseLayer
 
 class MaxPooling2D(BaseLayer):
-    def __init__(self, pool_size, stride):
+    def __init__(self, pool_size: int, stride: int):
         super().__init__()
         self.pool_size = pool_size
         self.stride = stride
         self.cache = None
 
-    def forward(self, input_array):
+    def forward(self, input_array, training=False):
         self.input = input_array
         N, H, W, C = input_array.shape
         H_out = 1 + (H - self.pool_size) // self.stride

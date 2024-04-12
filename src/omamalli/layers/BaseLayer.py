@@ -5,7 +5,7 @@ class BaseLayer:
         self.input = None
         self.output = None
 
-    def forward(self, input_array: np.ndarray) -> np.ndarray:
+    def forward(self, input_array: np.ndarray, training=False) -> np.ndarray:
         """
         Computes the forward pass of the layer.
         Should be implemented by all subclasses.

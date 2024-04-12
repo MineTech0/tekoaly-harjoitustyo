@@ -1,7 +1,11 @@
 from .BaseLayer import BaseLayer
 
 class Flatten(BaseLayer):
-    def forward(self, input_array):
+    def __init__(self):
+        super().__init__()
+        self.input_shape = None
+    
+    def forward(self, input_array, training=False):
         self.input_shape = input_array.shape  # Cache to use in backward pass
         return input_array.reshape(input_array.shape[0], -1)
 

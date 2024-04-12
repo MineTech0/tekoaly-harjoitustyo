@@ -1,3 +1,6 @@
 src/vertaismalli/.ipynb_checkpoints/malli-checkpoint.ipynb
 data*
-__pycache__
+__pycache__*
+.vscode*
+.pytest*
+.venv*

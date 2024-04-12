@@ -2,12 +2,12 @@ import numpy as np
 from .BaseLayer import BaseLayer
 
 class Dense(BaseLayer):
-    def __init__(self, input_size, output_size):
+    def __init__(self, input_size: int, output_size:int):
         super().__init__()
         self.weights = np.random.randn(input_size, output_size) * 0.01
         self.biases = np.zeros((1, output_size))
 
-    def forward(self, input_array: np.ndarray) -> np.ndarray:
+    def forward(self, input_array: np.ndarray, training=False) -> np.ndarray:
         self.input = input_array
         self.output = np.dot(input_array, self.weights) + self.biases
         return self.output
