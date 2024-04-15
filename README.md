@@ -1,4 +1,4 @@
-# tekoaly-harjoitustyo
+# Dance genre labeling using Convolutional Neural Network
 
 ## Dokumentaatio
 
