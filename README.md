@@ -1,4 +1,4 @@
-# Dance genre labeling using Convolutional Neural Network
+# Tanssilajin tunnistus Konvoluutioneuroverkon avulla
 
 ## Dokumentaatio
 
