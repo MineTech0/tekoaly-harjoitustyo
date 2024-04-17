@@ -1,4 +1,4 @@
-# tekoaly-harjoitustyo
+# Tanssilajin tunnistus Konvoluutioneuroverkon avulla
 
 ## Dokumentaatio
 
