@@ -6,6 +6,10 @@ class Dropout(BaseLayer):
         super().__init__()
         self.rate = rate
         self.mask = None
+        self.output_shape = None
+        
+    def initialize(self, input_shape=None):
+        self.output_shape = input_shape
 
     def forward(self, input_array, training=True):
         if training:

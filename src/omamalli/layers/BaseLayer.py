@@ -4,8 +4,10 @@ class BaseLayer:
     def __init__(self):
         self.input = None
         self.output = None
+        self.input_shape = None
+        self.output_shape = None
 
-    def forward(self, input_array: np.ndarray, training=False) -> np.ndarray:
+    def forward(self, input_array: np.ndarray, training: bool) -> np.ndarray:
         """
         Computes the forward pass of the layer.
         Should be implemented by all subclasses.

@@ -7,6 +7,13 @@ class MaxPooling2D(BaseLayer):
         self.pool_size = pool_size
         self.stride = stride
         self.cache = None
+        self.output_shape = None
+        
+    def initialize(self, input_shape=None):
+        H, W, C = input_shape
+        H_out = 1 + (H - self.pool_size) // self.stride
+        W_out = 1 + (W - self.pool_size) // self.stride
+        self.output_shape = (H_out, W_out, C)
 
     def forward(self, input_array, training=False):
         self.input = input_array

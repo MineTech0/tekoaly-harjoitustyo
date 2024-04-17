@@ -1,8 +1,9 @@
 import numpy as np
 from .BaseLayer import BaseLayer
+import scipy
 
 class Conv2D(BaseLayer):
-    def __init__(self, num_filters: int, kernel_size: int, input_shape: tuple, stride=1, learning_rate=0.01):
+    def __init__(self, num_filters: int, kernel_size: int, input_shape: tuple = None, stride=1):
         # Initialize the parent class
         super().__init__()
         
@@ -10,22 +11,30 @@ class Conv2D(BaseLayer):
         self.num_filters = num_filters  # Number of filters in the convolutional layer
         self.kernel_size = kernel_size  # Size of each filter (assumed square)
         self.stride = stride  # Stride size used during the convolution
-        self.learning_rate = learning_rate  # Learning rate for the optimization
         
         # Filters dimensions: (num_filters, kernel_size, kernel_size, input_channels)
-        _, _, input_channels = input_shape
-        self.filters = np.random.randn(num_filters, kernel_size, kernel_size, input_channels) * np.sqrt(2. / (kernel_size * kernel_size * input_channels))
+        if input_shape is not None:
+            _, _, input_channels = input_shape
+            self.filters = np.random.randn(num_filters, kernel_size, kernel_size, input_channels) * np.sqrt(2. / (kernel_size * kernel_size * input_channels))
+            
+            # Store input and output shapes
+            self.input_shape = input_shape  # Expected shape of the input
+            self.output_shape = self.compute_output_shape(input_shape)  # Calculated shape of the output
         
         # Initialize biases for each filter
         self.biases = np.zeros(num_filters)
         
-        # Store input and output shapes
-        self.input_shape = input_shape  # Expected shape of the input
-        self.output_shape = self.compute_output_shape(input_shape)  # Calculated shape of the output
-        
         # Placeholder for caching the input during the forward pass for use in the backward pass
         self.cache_input = None
-
+        
+    def initialize(self, input_shape=None):
+        # Initialize the filters and biases
+        if self.input_shape is None:
+            _, _, input_channels = input_shape
+            self.filters = np.random.randn(self.num_filters, self.kernel_size, self.kernel_size, input_channels) * np.sqrt(2. / (self.kernel_size * self.kernel_size * input_channels))
+            self.output_shape = self.compute_output_shape(input_shape)
+            self.input_shape = input_shape
+            
     def compute_output_shape(self, input_shape):
         # Calculate the dimensions of the output volume
         height, width, _ = input_shape
@@ -34,28 +43,36 @@ class Conv2D(BaseLayer):
         return (output_height, output_width, self.num_filters)
 
     def forward(self, input_array, training=False):
-        # Cache the input array for use in the backward pass
+        #check if input shape is correct
+        if input_array.shape[1:] != self.input_shape:
+            raise ValueError(f"Input shape {input_array.shape[1:]} does not match expected shape {self.input_shape}")
+        
+        batch_size, _, _, channels = input_array.shape
+        output_height, output_width, num_filters = self.output_shape
+        
+        # Initialize output array
+        output = np.zeros((batch_size, output_height, output_width, num_filters))
+        
         self.cache_input = input_array
-        batch_size, input_height, input_width, input_channels = input_array.shape
-        output_height, output_width, _ = self.output_shape
-        
-        # Initialize the output volume with zeros
-        output = np.zeros((batch_size, output_height, output_width, self.num_filters))
-        
-        # Convolve the filter over the input image
+
+        # Perform the convolution
         for i in range(batch_size):
-            for f in range(self.num_filters):
-                for y in range(0, output_height):
-                    for x in range(0, output_width):
-                        # Extract the current region of interest
-                        input_region = input_array[i, y*self.stride:y*self.stride+self.kernel_size, x*self.stride:x*self.stride+self.kernel_size, :]
-                        # Perform the convolution operation and add the bias
-                        output[i, y, x, f] = np.sum(input_region * self.filters[f]) + self.biases[f]
+            for f in range(num_filters):
+                for c in range(channels):
+                    temp_result = scipy.signal.convolve(input_array[i, :, :, c], self.filters[f, :, :, c], mode='valid')
+                
+                # Apply stride
+                if self.stride > 1:
+                    temp_result = temp_result[::self.stride, ::self.stride]
+                
+                output[i, :, :, f] = temp_result + self.biases[f]
+                
+
         return output
 
-    def backward(self, d_output):
+    def backward(self, d_output, learning_rate):
         # Prepare gradients for filters, biases, and input
-        batch_size, input_height, input_width, input_channels = self.cache_input.shape
+        batch_size = self.cache_input.shape[0]
         _, output_height, output_width, _ = d_output.shape
         
         d_filters = np.zeros(self.filters.shape)
@@ -76,6 +93,6 @@ class Conv2D(BaseLayer):
                         d_input[i, y*self.stride:y*self.stride+self.kernel_size, x*self.stride:x*self.stride+self.kernel_size, :] += d_output[i, y, x, f] * self.filters[f]
         
         # Update the filters and biases using the calculated gradients
-        self.filters -= self.learning_rate * d_filters
-        self.biases -= self.learning_rate * d_biases
+        self.filters -= learning_rate * d_filters
+        self.biases -= learning_rate * d_biases
         return d_input

@@ -3,6 +3,10 @@ import numpy as np
 
 class Softmax(BaseLayer):
     
+    def initialize(self, input_shape=None):
+        self.input_shape = input_shape
+        self.output_shape = input_shape
+    
     def forward(self, input_array, training=False):
         exps = np.exp(input_array - np.max(input_array, axis=-1, keepdims=True))
         self.output = exps / np.sum(exps, axis=-1, keepdims=True)
