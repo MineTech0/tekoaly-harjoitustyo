@@ -15,6 +15,7 @@ class TestMaxPooling2D(unittest.TestCase):
         expected_output = np.array([[[[7, 8]]]])  # 1x1x1x2 tensor after pooling
 
         maxpool = MaxPooling2D(pool_size, stride)
+        maxpool.initialize(input_shape=(2, 2, 2))
         output = maxpool.forward(input_array)
         
         np.testing.assert_array_equal(output, expected_output)
@@ -30,11 +31,13 @@ class TestMaxPooling2D(unittest.TestCase):
         output_gradient = np.array([[[[1, 1]]]])  # Gradient w.r.t output, 1x1x1x2 tensor
 
         maxpool = MaxPooling2D(pool_size, stride)
+        maxpool.initialize(input_shape=(2, 2, 2))
         maxpool.forward(input_array)  # Set up forward pass to populate cache
         input_gradient = maxpool.backward(output_gradient, None)
 
         expected_input_gradient = np.array([[[[0, 0], [0, 1]],
-                                             [[0, 0], [0, 1]]]])  # Corresponding input gradients
+                                     [[0, 0], [0, 1]]]])
+
 
         np.testing.assert_array_equal(input_gradient, expected_input_gradient)
 

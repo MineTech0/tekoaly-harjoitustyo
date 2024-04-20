@@ -70,29 +70,26 @@ class Conv2D(BaseLayer):
 
         return output
 
-    def backward(self, d_output, learning_rate):
-        # Prepare gradients for filters, biases, and input
-        batch_size = self.cache_input.shape[0]
-        _, output_height, output_width, _ = d_output.shape
+    def backward(self, output_gradient, learning_rate):
+        batch_size, _, _, channels = self.cache_input.shape
         
-        d_filters = np.zeros(self.filters.shape)
-        d_biases = np.zeros(self.biases.shape)
-        d_input = np.zeros(self.cache_input.shape)
-        
-        # Backpropagation through the convolutional layer
+        d_filters = np.zeros_like(self.filters)
+        d_biases = np.sum(output_gradient, axis=(0, 1, 2))  # Sum over all except the filter axis
+        d_input = np.zeros_like(self.cache_input)
+
+        # Using scipy.signal.correlate to compute the gradient w.r.t inputs and update gradients w.r.t filters
         for i in range(batch_size):
             for f in range(self.num_filters):
-                for y in range(output_height):
-                    for x in range(output_width):
-                        input_region = self.cache_input[i, y*self.stride:y*self.stride+self.kernel_size, x*self.stride:x*self.stride+self.kernel_size, :]
-                        # Gradient w.r.t. filter weights
-                        d_filters[f] += d_output[i, y, x, f] * input_region
-                        # Gradient w.r.t. biases
-                        d_biases[f] += d_output[i, y, x, f]
-                        # Gradient w.r.t. input of the layer
-                        d_input[i, y*self.stride:y*self.stride+self.kernel_size, x*self.stride:x*self.stride+self.kernel_size, :] += d_output[i, y, x, f] * self.filters[f]
-        
-        # Update the filters and biases using the calculated gradients
+                for c in range(channels):
+                    # Rotate filter by 180 degrees to convert convolution to correlation
+                    rotated_filter = np.rot90(self.filters[f, :, :, c], 2)
+                    # Computing the gradient w.r.t input
+                    d_input[i, :, :, c] += scipy.signal.correlate(output_gradient[i, :, :, f], rotated_filter, mode='full')
+                    # Updating gradient w.r.t filters
+                    d_filters[f, :, :, c] += scipy.signal.correlate(self.cache_input[i, :, :, c], output_gradient[i, :, :, f], mode='valid')
+
+        # Updating the weights and biases
         self.filters -= learning_rate * d_filters
         self.biases -= learning_rate * d_biases
+        
         return d_input

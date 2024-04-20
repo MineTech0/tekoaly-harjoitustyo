@@ -14,7 +14,7 @@ class Dense(BaseLayer):
         input_size = input_shape[0]
         # Initialize weights with dimensions (number of input features, number of output features)
         self.weights = np.random.randn(input_size, self.output_shape[0]) * 0.01
-        self.biases = np.zeros(self.output_shape)
+        self.biases = np.zeros((1, self.output_shape[0]))
 
     def forward(self, input_array: np.ndarray, training=False) -> np.ndarray:
         self.input = input_array

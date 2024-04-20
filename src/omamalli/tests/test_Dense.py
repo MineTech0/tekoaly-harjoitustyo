@@ -5,7 +5,8 @@ from ..layers import Dense
 class TestDenseLayer(unittest.TestCase):
     def setUp(self):
         self.input_size, self.output_size = 4, 3
-        self.dense = Dense(self.input_size, self.output_size)
+        self.dense = Dense(self.output_size)
+        self.dense.initialize(input_shape=(self.input_size,))
         self.input_array = np.random.randn(1, self.input_size)
         self.output_gradient = np.random.randn(1, self.output_size)
         self.learning_rate = 0.01

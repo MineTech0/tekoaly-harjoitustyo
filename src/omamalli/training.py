@@ -2,8 +2,9 @@ import numpy as np
 
 from neural_network import NeuralNetwork
 from layers import Dense, ReLU, Conv2D, Flatten, Dropout, MaxPooling2D, Softmax
+import pathlib
 
-DATAN_POLKU = "data/kappaleet.npz"
+DATAN_POLKU = pathlib.Path(__file__).parent.parent / "data" / "kappaleet.npz" 
 
 def lataa_data():
     data = np.load(DATAN_POLKU, allow_pickle=True)
