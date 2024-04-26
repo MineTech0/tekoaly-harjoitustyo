@@ -2,7 +2,7 @@
 
 The project uses convolutional neural network to recognize the dance style from the music. The songs are converted to spectrograms and the network is trained to recognize the dance style from the spectrogram.
 
-This project has to implementations of the neural network. The first implementation is the own implementation of neural network without using any neural network libary. The second implementation uses Tensorflow and Keras.
+This project has two implementations of the neural network. The first implementation is the own implementation of neural network without using any neural network libary. The second implementation uses Tensorflow and Keras.
 
 ## Documentation
 
