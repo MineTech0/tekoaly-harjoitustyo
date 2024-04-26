@@ -1,7 +1,17 @@
-# Tanssilajin tunnistus Konvoluutioneuroverkon avulla
+# Dance style recognition with convolutional neural network
 
-## Dokumentaatio
+The project uses convolutional neural network to recognize the dance style from the music. The songs are converted to spectrograms and the network is trained to recognize the dance style from the spectrogram.
 
-[Määrittelydokumentti](https://github.com/MineTech0/tekoaly-harjoitustyo/blob/main/M%C3%A4%C3%A4rittelydokumentti.md)
+This project has to implementations of the neural network. The first implementation is the own implementation of neural network without using any neural network libary. The second implementation uses Tensorflow and Keras.
 
-[Viikkoraportit](https://github.com/MineTech0/tekoaly-harjoitustyo/tree/main/viikkoraportit) 
+## Documentation
+
+[Definition](./dokumentaatio/Definition.md)
+
+[Weekly reports](https://github.com/MineTech0/tekoaly-harjoitustyo/tree/main/viikkoraportit) 
+
+[Implementation](./dokumentaatio/Implementation.md)
+
+[Testing](./dokumentaatio/Testing.md)
+
+[User guide](./dokumentaatio/UserGuide.md)
