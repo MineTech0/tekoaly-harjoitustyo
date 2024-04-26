@@ -1,1 +1,0 @@
-[1]L. Roberts, “Understanding the Mel Spectrogram,” Medium, Mar. 14, 2020. https://medium.com/analytics-vidhya/understanding-the-mel-spectrogram-fca2afa2ce53

@@ -5,3 +5,4 @@ from .MaxPooling2D import MaxPooling2D
 from .Conv2d import Conv2D
 from .ReLU import ReLU
 from .Softmax import Softmax
+from .BatchNormalization import BatchNormalization

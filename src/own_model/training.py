@@ -1,8 +1,11 @@
 import numpy as np
 
 from neural_network import NeuralNetwork
-from layers import Dense, ReLU, Conv2D, Flatten, Dropout, MaxPooling2D, Softmax
+from layers import Dense, ReLU, Conv2D, Flatten, Dropout, MaxPooling2D, Softmax, BatchNormalization
 import pathlib
+
+import warnings
+warnings.filterwarnings("error")
 
 DATAN_POLKU = pathlib.Path(__file__).parent.parent / "data" / "kappaleet.npz" 
 
@@ -35,11 +38,18 @@ print("labels:", labels)
 
 model = NeuralNetwork()
 
-model.add(Conv2D(8, 3, input_shape=(X_train.shape[1], X_train.shape[2], 1)))
+model.add(Conv2D(16, 4, input_shape=(X_train.shape[1], X_train.shape[2], 1)))
 model.add(ReLU())
+model.add(BatchNormalization())
+model.add(MaxPooling2D(2))
+model.add(Conv2D(8, 3))
+model.add(ReLU())
+model.add(BatchNormalization())
 model.add(MaxPooling2D(2,2))
-model.add(Conv2D(16, 3))
+model.add(Dropout(0.2))
+model.add(Conv2D(4, 2))
 model.add(ReLU())
+model.add(BatchNormalization())
 model.add(MaxPooling2D(2,2))
 model.add(Dropout(0.2))
 model.add(Flatten())
@@ -52,5 +62,6 @@ model.add(Dense(y_train.shape[1]))
 model.add(Softmax())
 
 model.compile()
-
+ 
 model.fit(X_train, y_train, epochs=10, learning_rate=0.01, batch_size=32, X_val=X_test, Y_val=y_test)
+

@@ -1,0 +1,2 @@
+[1]L. Roberts, “Understanding the Mel Spectrogram,” Medium, Mar. 14, 2020. https://medium.com/analytics-vidhya/understanding-the-mel-spectrogram-fca2afa2ce53
+[2] https://neuralthreads.medium.com/categorical-cross-entropy-loss-the-most-important-loss-function-d3792151d05b

@@ -22,24 +22,30 @@ class NeuralNetwork:
     def predict(self, input_data, training=False):
         output = input_data
         for layer in self.layers:
-            #time_start = time.time()
             output = layer.forward(output, training=training)
-            #time_end = time.time()
-            #print(f"Layer {layer.__class__} forward pass took {time_end - time_start:.4f} seconds.")
         return output
 
-    def compute_loss(self, predicted_output, true_output):
-        # This is a simplified mean squared error loss
-        return np.mean((predicted_output - true_output) ** 2)
+    def compute_loss(self, predicted_output, true_output, epsilon=1e-8):
+        # Clip predictions to avoid log(0) and division by zero issues
+        predicted_output = np.clip(predicted_output, epsilon, 1. - epsilon)
+        # Compute cross-entropy from probabilities
+        loss = -np.sum(true_output * np.log(predicted_output), axis=1)
+        # Average over the batch
+        return np.mean(loss)
 
-    def compute_loss_gradient(self, predicted_output, true_output):
-        # Gradient of mean squared error loss w.r.t. predicted output
-        return 2 * (predicted_output - true_output) / true_output.size
+    def compute_loss_gradient(self, predicted_output, true_output, epsilon=1e-8):
+        # Clip predictions to ensure stability in division and log operations
+        predicted_output = np.clip(predicted_output, epsilon, 1. - epsilon)
+        # Compute gradient of the loss
+        gradient = -(true_output / predicted_output) / predicted_output.shape[0]
+        return gradient
+
 
     def fit(self, X_train, Y_train, epochs, learning_rate, batch_size, X_val=None, Y_val=None, save_best_only=True, filename='best_model.pkl'):
         n_samples = X_train.shape[0]
         n_batches = int(np.ceil(n_samples / batch_size))
         best_loss = float('inf')
+        clip_norm = 1.0
         print(f"Starting training with {n_samples} samples, {n_batches} batches per epoch, and batch size {batch_size}.")
 
         for epoch in range(epochs):
@@ -62,11 +68,19 @@ class NeuralNetwork:
                 epoch_loss += loss
                 loss_gradient = self.compute_loss_gradient(predicted_output, Y_batch)
                 for layer in reversed(self.layers):
+                    # Clip the loss gradient to prevent explosion
+                    gradient_norm = np.linalg.norm(loss_gradient)
+                    if gradient_norm > clip_norm:
+                        loss_gradient *= clip_norm / gradient_norm
+                    # Perform the backward pass
                     loss_gradient = layer.backward(loss_gradient, learning_rate)
 
                 end_time = time.time()
-                print(f"Batch {i+1}/{n_batches}, Training Loss: {loss:.4f}, Time: {end_time - start_time:.4f} seconds")
-
+                b_time = end_time - start_time
+                print(f"Batch {i+1}/{n_batches}, Training Loss: {loss:.4f}, Time: {b_time:.4f} seconds")
+            
+            print(f"Epoch {epoch+1} completed")
+            
             epoch_loss /= n_batches
             if X_val is not None and Y_val is not None:
                 val_predicted_output = self.predict(X_val)

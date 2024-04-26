@@ -4,44 +4,44 @@ import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
-KOULUTUS_DATA_POLKU = "data/kappaleet/koulutus/"
-VALIDOINTI_DATA_POLKU = "data/kappaleet/validointi/"
-TALLENNUS_POLKU = "data/"
+TRAINING_DATA_PATH = "data/songs/training/"
+VALIDATION_DATA_PATH = "data/songs/validation/"
+SAVE_PATH = "data/"
 
-NÄYTTEEN_PITUUS = 10
-KAPPALEEN_ALKU_OFFSET = 30
+SAMPLE_LENGTH = 10
+SONG_START_OFFSET = 30
 
 
-def lataa_data():
+def load_data():
     '''
-    Lataa kappaleet ja niiden tanssilajilabelit.
+    Load songs and their dance style labels.
 
-    Oletetaan, että sinulla on lista kappalepolkuja ja vastaavia tanssilajilabeleita
-    Kansion nimi vastaa labelia (esim. salsa, tango, ...) 
+    Assumes you have a list of song paths and corresponding dance style labels.
+    The folder name corresponds to the label (e.g., salsa, tango, ...)
     '''
 
-    kappalepolut = glob.glob(f'{KOULUTUS_DATA_POLKU}/*/*.mp3')
-    tanssilajilabelit = [polku.split('/')[-2] for polku in kappalepolut]
+    song_paths = glob.glob(f'{TRAINING_DATA_PATH}/*/*.mp3')
+    dance_style_labels = [path.split('/')[-2] for path in song_paths]
 
-    if len(kappalepolut) == 0:
-        raise ValueError('Testi kappaleita ei löytynyt. Tarkista polku.')
+    if len(song_paths) == 0:
+        raise ValueError('No test songs found. Check the path.')
 
-    print('Löytyi', len(kappalepolut), 'kappaletta.')
-    print('Tanssilajit:', set(tanssilajilabelit))
+    print('Found', len(song_paths), 'songs.')
+    print('Dance styles:', set(dance_style_labels))
 
-    return kappalepolut, tanssilajilabelit
+    return song_paths, dance_style_labels
 
 
-def pilko_kappaleet(kappalepolut, tanssilajilabelit, pituus=NÄYTTEEN_PITUUS):
+def split_songs(song_paths, dance_style_labels, length=SAMPLE_LENGTH):
     '''
-    Lataa kappaleet ja pilkkoo ne 10 sekunnin pituisiin pätkiin.
+    Loads the songs and splits them into 10-second segments.
     '''
     X = []
     y = []
-    for polku, label in zip(kappalepolut, tanssilajilabelit):
-        kappale, sr = librosa.load(polku, offset=KAPPALEEN_ALKU_OFFSET)
-        for i in range(0, len(kappale) - sr*pituus, sr*pituus):
-            X.append(kappale[i:i+sr*pituus])
+    for path, label in zip(song_paths, dance_style_labels):
+        song, sr = librosa.load(path, offset=SONG_START_OFFSET)
+        for i in range(0, len(song) - sr*length, sr*length):
+            X.append(song[i:i+sr*length])
             y.append(label)
     return np.array(X), np.array(y)
 
@@ -51,81 +51,79 @@ HOP_LENGTH = N_FFT // 2
 N_MELS = 64
 
 
-def luo_spektrogrammi(aaltomuoto):
+def create_spectrogram(waveform):
     '''
-    Luo spektrogrammin aaltomuodosta.
+    Creates a spectrogram from the waveform.
     '''
     melspec = librosa.feature.melspectrogram(
-        y=aaltomuoto, hop_length=HOP_LENGTH, n_fft=N_FFT, n_mels=N_MELS)
+        y=waveform, hop_length=HOP_LENGTH, n_fft=N_FFT, n_mels=N_MELS)
     melspec = librosa.power_to_db(melspec**2)
     return melspec
 
 
 def to_one_hot(labels, dimension):
     '''
-    Muuntaa labelit one-hot muotoon.
+    Converts labels to one-hot format.
     '''
     results = np.eye(dimension)[labels]
     return results
 
 
-def luo_testidata():
+def create_test_data():
     '''
-    Lataa kappaleet, pilkkoo ne 10 sekunnin pituisiin pätkiin ja luo spektrogrammit.
-    Tallentaa koulutusdatan tiedostoon kappaleet.npz
+    Loads songs, splits them into 10-second segments, and creates spectrograms.
+    Saves the training data to the file songs.npz
     '''
 
-    kappalepolut, tanssilajilabelit = lataa_data()
-    näytteet, näytteiden_labelit = pilko_kappaleet(
-        kappalepolut, tanssilajilabelit)
-    spektrogrammit = np.array([luo_spektrogrammi(näyte) for näyte in näytteet])
+    song_paths, dance_style_labels = load_data()
+    samples, sample_labels = split_songs(song_paths, dance_style_labels)
+    spectrograms = np.array([create_spectrogram(sample) for sample in samples])
 
-    # Labelien käsittely
+    # Handling labels
     label_encoder = LabelEncoder()
-    tanssilaji_numerot = label_encoder.fit_transform(näytteiden_labelit)
-    tanssilaji_one_hot = to_one_hot(
-        tanssilaji_numerot, len(label_encoder.classes_))
+    dance_style_numbers = label_encoder.fit_transform(sample_labels)
+    dance_style_one_hot = to_one_hot(dance_style_numbers, len(label_encoder.classes_))
 
-    # Jaa data opetus- ja testisetteihin
+    # Split data into training and test sets
     X_train, X_test, y_train, y_test = train_test_split(
-        spektrogrammit, tanssilaji_one_hot, test_size=0.2, random_state=42)
+        spectrograms, dance_style_one_hot, test_size=0.2, random_state=42)
 
     print('Train:', X_train.shape, y_train.shape)
-    print('Test', X_test.shape, y_test.shape)
+    print('Test:', X_test.shape, y_test.shape)
 
-    np.savez(f"{TALLENNUS_POLKU}/kappaleet.npz",
+    np.savez(f"{SAVE_PATH}/training.npz",
              X_train=X_train, y_train=y_train,
              X_test=X_test, y_test=y_test,
              labels=label_encoder.classes_)
 
 
-def luo_validointi_data():
+def create_validation_data():
     '''
-    Lataa validointidatan ja luo spektrogrammit.
-    Tallentaa validointidatan tiedostoon validointi.npz
-    Validointi datassa otetaan vain yksi näyte per kappale.
+    Loads validation data and creates spectrograms.
+    Saves the validation data to the file validation.npz
+    Only takes one sample per song in the validation data.
     '''
 
-    validation_files = glob.glob(f'{VALIDOINTI_DATA_POLKU}/*/*.mp3')
-    validation_labels = [polku.split('/')[-2] for polku in validation_files]
+    validation_files = glob.glob(f'{VALIDATION_DATA_PATH}/*/*.mp3')
+    validation_labels = [path.split('/')[-2] for path in validation_files]
 
     if len(validation_files) == 0:
-        raise ValueError('Validointi kappaleita ei löytynyt. Tarkista polku.')
+        raise ValueError('No validation songs found. Check the path.')
 
-    print('Löytyi', len(validation_files), 'kappaletta.')
-    print('Tanssilajit:', set(validation_labels))
+    print('Found', len(validation_files), 'songs.')
+    print('Dance styles:', set(validation_labels))
 
-    def lataa_ja_muunna_audio(audio_tiedosto):
-        aaltomuoto, sr = librosa.load(
-            audio_tiedosto, offset=KAPPALEEN_ALKU_OFFSET, duration=NÄYTTEEN_PITUUS)
-        return aaltomuoto
+    def load_and_convert_audio(audio_file):
+        waveform, sr = librosa.load(
+            audio_file, offset=SONG_START_OFFSET, duration=SAMPLE_LENGTH)
+        return waveform
 
     validation_spectrograms = []
 
-    for polku in validation_files:
-        aaltomuoto = lataa_ja_muunna_audio(polku)
-        spektrogrammi = luo_spektrogrammi(aaltomuoto)
-        validation_spectrograms.append(spektrogrammi)
+    for path in validation_files:
+        waveform = load_and_convert_audio(path)
+        spectrogram = create_spectrogram(waveform)
+        validation_spectrograms.append(spectrogram)
 
     validation_spectrograms = np.array(validation_spectrograms)
 
@@ -138,12 +136,12 @@ def luo_validointi_data():
     print('Validation:', validation_spectrograms.shape,
           validation_labels_one_hot.shape)
 
-    np.savez(f"{TALLENNUS_POLKU}/validointi.npz", X_val=validation_spectrograms,
+    np.savez(f"{SAVE_PATH}/validation.npz", X_val=validation_spectrograms,
              y_val=validation_labels_one_hot, labels=label_encoder.classes_)
 
 
 if __name__ == "__main__":
-    print('Luodaan testidata...')
-    luo_testidata()
-    print('Luodaan validointidata...')
-    luo_validointi_data()
+    print('Creating test data...')
+    create_test_data()
+    print('Creating validation data...')
+    create_validation_data()

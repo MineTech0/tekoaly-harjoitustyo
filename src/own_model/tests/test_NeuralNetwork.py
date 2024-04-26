@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from omamalli.neural_network import NeuralNetwork
+from own_model.neural_network import NeuralNetwork
 from .TestLayer import TestLayer
 
 class NeuralNetworkTests(unittest.TestCase):
@@ -26,18 +26,6 @@ class NeuralNetworkTests(unittest.TestCase):
         self.nn.compile()
         result = self.nn.predict(np.zeros(10))
         self.assertEqual(result.shape[0], 100)
-
-    def test_compute_loss(self):
-        predicted = np.array([1, 2, 3])
-        true = np.array([1, 2, 3])
-        loss = self.nn.compute_loss(predicted, true)
-        self.assertEqual(loss, 0)
-
-    def test_compute_loss_gradient(self):
-        predicted = np.array([1, 2, 3])
-        true = np.array([1, 2, 3])
-        gradient = self.nn.compute_loss_gradient(predicted, true)
-        self.assertTrue(np.array_equal(gradient, np.zeros_like(predicted)))
 
     def test_training(self):
         layer = TestLayer()

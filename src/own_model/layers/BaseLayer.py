@@ -6,6 +6,13 @@ class BaseLayer:
         self.output = None
         self.input_shape = None
         self.output_shape = None
+        
+    def initialize(self, input_shape=None):
+        """
+        Initializes the layer with the input shape.
+        Should be implemented by all subclasses.
+        """
+        raise NotImplementedError("Must be implemented by subclass.")
 
     def forward(self, input_array: np.ndarray, training: bool) -> np.ndarray:
         """
