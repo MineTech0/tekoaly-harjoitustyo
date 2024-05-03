@@ -3,11 +3,12 @@ from .BaseLayer import BaseLayer
 
 
 class Dense(BaseLayer):
-    def __init__(self, output_size: int):
+    def __init__(self, output_size: int, l2_lambda: float = 0.1):
         super().__init__()
         self.output_shape = (output_size,)
         self.weights = None
         self.biases = None
+        self.l2_lambda = l2_lambda
 
     def initialize(self, input_shape):
         self.input_shape = input_shape
@@ -26,7 +27,7 @@ class Dense(BaseLayer):
         biases_gradient = np.sum(output_gradient, axis=0, keepdims=True)
 
         # Update parameters
-        self.weights -= learning_rate * weights_gradient
+        self.weights -= learning_rate * (weights_gradient + self.l2_lambda * self.weights)
         self.biases -= learning_rate * biases_gradient
 
         # Compute and return input gradient

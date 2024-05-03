@@ -3,7 +3,7 @@ from numpy.lib.stride_tricks import as_strided
 from .BaseLayer import BaseLayer
 
 class MaxPooling2D(BaseLayer):
-    def __init__(self, pool_size: int, stride: int):
+    def __init__(self, pool_size: int, stride: int = 1):
         super().__init__()
         self.pool_size = pool_size
         self.stride = stride

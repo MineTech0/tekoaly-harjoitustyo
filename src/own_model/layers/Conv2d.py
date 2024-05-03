@@ -3,7 +3,7 @@ from .BaseLayer import BaseLayer
 import scipy
 
 class Conv2D(BaseLayer):
-    def __init__(self, num_filters: int, kernel_size: int, input_shape: tuple = None, stride=1):
+    def __init__(self, num_filters: int, kernel_size: int, input_shape: tuple = None, stride=1, l2_lambda=0.1):
         # Initialize the parent class
         super().__init__()
         
@@ -11,6 +11,7 @@ class Conv2D(BaseLayer):
         self.num_filters = num_filters  # Number of filters in the convolutional layer
         self.kernel_size = kernel_size  # Size of each filter (assumed square)
         self.stride = stride  # Stride size used during the convolution
+        self.l2_lambda = l2_lambda # L2 regularization lambda
         
         # Filters dimensions: (num_filters, kernel_size, kernel_size, input_channels)
         if input_shape is not None:
@@ -89,7 +90,7 @@ class Conv2D(BaseLayer):
                     d_filters[f, :, :, c] += scipy.signal.correlate(self.cache_input[i, :, :, c], output_gradient[i, :, :, f], mode='valid')
 
         # Updating the weights and biases
-        self.filters -= learning_rate * d_filters
+        self.filters -= learning_rate * (d_filters + self.l2_lambda * self.filters)
         self.biases -= learning_rate * d_biases
         
         return d_input

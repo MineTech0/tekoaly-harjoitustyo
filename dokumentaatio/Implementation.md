@@ -14,7 +14,7 @@ The project is divided to `own_model` and `peer_model`. The `peer_model` is used
 
 ## Preprocessing
 
-[Preprocessing documentation](preprocessing.md)
+[Preprocessing documentation](Preprocessing.md)
 
 ## Peer model 
 

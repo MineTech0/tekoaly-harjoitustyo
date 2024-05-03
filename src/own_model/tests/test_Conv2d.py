@@ -73,6 +73,40 @@ class TestConv2D(unittest.TestCase):
         
         self.assertFalse(np.allclose(initial_filters, conv_layer.filters))
         self.assertFalse(np.allclose(initial_biases, conv_layer.biases))
+        
+    def test_no_padding_perfect_fit(self):
+        """ Test convolution with no padding where the kernel fits the input dimensions perfectly. """
+        input_shape = (8, 8, 3)
+        num_filters = 2
+        kernel_size = 3
+        stride = 1
+        conv_layer = Conv2D(num_filters, kernel_size, input_shape, stride)
+        input_array = np.random.rand(1, 8, 8, 3)  # Batch size 1
+        output = conv_layer.forward(input_array)
+        expected_output_shape = (6, 6, num_filters)  # (8-3)//1 + 1 = 6
+        self.assertEqual(output.shape[1:], expected_output_shape)
 
+    def test_no_padding_stride(self):
+        """ Test convolution with no padding and a stride greater than 1. """
+        input_shape = (8, 8, 3)
+        num_filters = 2
+        kernel_size = 3
+        stride = 2
+        conv_layer = Conv2D(num_filters, kernel_size, input_shape, stride)
+        input_array = np.random.rand(1, 8, 8, 3)
+        output = conv_layer.forward(input_array)
+        expected_output_shape = (3, 3, num_filters)  # (8-3)//2 + 1 = 3
+        self.assertEqual(output.shape[1:], expected_output_shape)
+
+    def test_input_shape_mismatch(self):
+        """ Test error handling when the input shape does not match the expected shape. """
+        input_shape = (8, 8, 3)
+        num_filters = 2
+        kernel_size = 3
+        stride = 1
+        conv_layer = Conv2D(num_filters, kernel_size, input_shape, stride)
+        wrong_input_array = np.random.rand(1, 7, 7, 3)  # Incorrect dimensions
+        with self.assertRaises(ValueError):
+            conv_layer.forward(wrong_input_array)
 if __name__ == '__main__':
     unittest.main()
