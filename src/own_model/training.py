@@ -4,13 +4,10 @@ from neural_network import NeuralNetwork
 from layers import Dense, ReLU, Conv2D, Flatten, Dropout, MaxPooling2D, Softmax, BatchNormalization
 import pathlib
 
-import warnings
-warnings.filterwarnings("error")
+DATA_PATH = pathlib.Path(__file__).parent.parent / "data" / "training.npz" 
 
-DATAN_POLKU = pathlib.Path(__file__).parent.parent / "data" / "kappaleet.npz" 
-
-def lataa_data():
-    data = np.load(DATAN_POLKU, allow_pickle=True)
+def load_data():
+    data = np.load(DATA_PATH, allow_pickle=True)
 
     # Accessing the training and testing data
     X_train = data['X_train']
@@ -23,7 +20,7 @@ def lataa_data():
 
 
 
-X_train, y_train, X_test, y_test, labels = lataa_data()
+X_train, y_train, X_test, y_test, labels = load_data()
 
 #add channel to the data
 X_train = np.expand_dims(X_train, axis=3)

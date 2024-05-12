@@ -1,0 +1,3 @@
+[run]
+source= own_model.layers, own_model.neural_network
+omit = *tests*
