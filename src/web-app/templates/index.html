@@ -17,9 +17,15 @@
         <button type="submit" class="btn btn-primary">Predict</button>
     </form>
     {% if prediction %}
+    <h2>Peer model</h2>
     <div class="alert alert-success mt-3" role="alert">
-        Predicted Dance Style: <b>{{ prediction }}</b><br>
-        Confidence: {{ (confidence * 100).round(2)}}%
+        Predicted Dance Style: <b>{{ prediction.peer_prediction }}</b><br>
+        Confidence: {{ (prediction.peer_confidence * 100).round(2)}}%
+    </div>
+    <h2>Own model</h2>
+    <div class="alert alert-success mt-3" role="alert">
+        Predicted Dance Style: <b>{{ prediction.own_prediction }}</b><br>
+        Confidence: {{ (prediction.own_confidence * 100).round(2)}}%
     </div>
     {% endif %}
 </div>
