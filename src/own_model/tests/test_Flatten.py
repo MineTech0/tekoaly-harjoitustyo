@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from ..layers import Flatten  # Adjust the import path to match the location of your Flatten class
+from own_model.layers import Flatten  # Adjust the import path to match the location of your Flatten class
 
 class TestFlattenLayer(unittest.TestCase):
     def setUp(self):

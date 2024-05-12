@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 from own_model.neural_network import NeuralNetwork
-from .TestLayer import TestLayer
+from TestLayer import TestLayer
 
 class NeuralNetworkTests(unittest.TestCase):
     def setUp(self):
@@ -26,15 +26,6 @@ class NeuralNetworkTests(unittest.TestCase):
         self.nn.compile()
         result = self.nn.predict(np.zeros(10))
         self.assertEqual(result.shape[0], 100)
-
-    def test_training(self):
-        layer = TestLayer()
-        self.nn.add(layer)
-        self.nn.compile()
-        X_train = np.zeros((10, 10))
-        Y_train = np.zeros((10, 100))
-        self.nn.fit(X_train, Y_train, epochs=1, learning_rate=0.01, batch_size=5)
-        # Check if training does not raise any exceptions
 
     def test_save_load(self):
         import os

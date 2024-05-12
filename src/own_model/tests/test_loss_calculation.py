@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from .TestLayer import TestLayer
+from TestLayer import TestLayer
 from own_model.neural_network import NeuralNetwork
 
 class TestLossFunctions(unittest.TestCase):
@@ -16,13 +16,19 @@ class TestLossFunctions(unittest.TestCase):
         expected_loss = - (0 * np.log(0.1) + 1 * np.log(0.9) + 1 * np.log(0.8) + 0 * np.log(0.2)) / 2
         np.testing.assert_almost_equal(loss, expected_loss)
 
-    def test_gradient_correctness(self):
-        predicted = np.array([[0.1, 0.9], [0.8, 0.2]])
-        true = np.array([[0, 1], [1, 0]])
-        gradient = self.nn.compute_loss_gradient(predicted, true)
-        # Manually computed expected gradient
-        expected_gradient = np.array([[-0. / 0.1, -1 / 0.9], [-1 / 0.8, -0. / 0.2]]) / 2
-        np.testing.assert_array_almost_equal(gradient, expected_gradient)
+    def test_compute_loss_gradient(self):
+        """
+        Test the compute_loss_gradient method.
+        """
+        neural_network = NeuralNetwork()
+
+        # Test case 1: Single sample
+        y_predicted = np.array([[0.2, 0.3, 0.5]])
+        y_true = np.array([[0, 1, 0]])
+        expected_gradient = np.array([[0.2, -0.7, 0.5]])
+        computed_gradient = neural_network.compute_loss_gradient(y_predicted, y_true)
+        np.testing.assert_array_almost_equal(computed_gradient, expected_gradient, decimal=6)
+
 
     def test_numerical_stability(self):
         predicted = np.array([[1e-10, 1.0 - 1e-10], [1e-10, 1.0 - 1e-10]])

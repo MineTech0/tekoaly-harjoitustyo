@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from ..layers import ReLU
+from own_model.layers import ReLU
 
 class TestReLU(unittest.TestCase):
     def test_forward_positive_input(self):

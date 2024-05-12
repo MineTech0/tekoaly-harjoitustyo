@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from ..layers import Dropout  # Adjust the import path to match the location of your Dropout class
+from own_model.layers import Dropout  # Adjust the import path to match the location of your Dropout class
 
 class TestDropoutLayer(unittest.TestCase):
     def setUp(self):

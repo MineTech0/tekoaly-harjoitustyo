@@ -1,6 +1,6 @@
 import numpy as np
 import unittest
-from ..layers import Conv2D
+from own_model.layers import Conv2D
 
 class TestConv2D(unittest.TestCase):
         

@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from ..layers import Softmax
+from own_model.layers import Softmax
 
 class TestSoftmax(unittest.TestCase):
     def test_forward_single_vector(self):
