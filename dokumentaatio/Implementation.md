@@ -1,28 +1,33 @@
 # Implementation
 
-## Idea
+## Overview
 
-The idea was to creata neural network modal that cans to recognice dance style from music. This would be achived by training convolutional neural network to recognize the dance style from the music. The songs would be converted to spectrograms and the network would be trained to recognize the dance style from the spectrogram. The motivation for using convolutional neural network was that it is good at recognizing patterns from images and spectrogram is a image that represents the music in a way that is easy to analyze. I used music genre recognition as a reference for the project. 
+This document outlines the implementation of a neural network model designed to recognize dance styles from music. The approach utilizes a convolutional neural network (CNN), leveraging spectrograms of songs to train the model efficiently in identifying specific dance styles. Drawing inspiration from existing music genre recognition projects, this model adapts similar methodologies to analyze dance-related audio patterns.
 
-References for music genre recognition:
-- Thomas-Bouvier, “GitHub - thomas-bouvier/music-genre-recognition: Musical genre recognition using a CNN,” GitHub. https://github.com/thomas-bouvier/music-genre-recognition
-- Priya-Dwivedi, “GitHub - priya-dwivedi/Music_Genre_Classification,” GitHub. https://github.com/priya-dwivedi/Music_Genre_Classification
+## References
 
-## Structure
+For foundational concepts and methodologies, the project referenced the following works on music genre recognition:
+- Thomas-Bouvier. "Musical genre recognition using a CNN," GitHub repository. [GitHub - thomas-bouvier/music-genre-recognition](https://github.com/thomas-bouvier/music-genre-recognition)
+- Priya-Dwivedi. "Music Genre Classification," GitHub repository. [GitHub - priya-dwivedi/Music_Genre_Classification](https://github.com/priya-dwivedi/Music_Genre_Classification)
 
-The project is divided to `own_model` and `peer_model`. The `peer_model` is used to compare the implementation of `own_model `which is the own implementation of neural network without using any neural network libary. There is also `preprocess_data.py` that is used to load and convert the song to spectograms.
+Also more sources can be found in [Sources.md](Sources.md).
+
+## Project Structure
+
+The project is organized into two main components:
+- **`own_model`**: A custom-built neural network developed without the use of standard neural network libraries.
+- **`peer_model`**: Utilizes TensorFlow and Keras to benchmark against the `own_model`.
+- **`preprocess_data.py`**: A script responsible for loading music files and converting them into spectrograms, preparing them for model ingestion.
 
 ## Preprocessing
 
-[Preprocessing documentation](Preprocessing.md)
+Detailed preprocessing steps and methodologies are further elaborated in [Preprocessing Documentation](Preprocessing.md).
 
-## Peer model 
+## Peer Model Description
 
-Peer model uses Tensorflow and Keras.
-The model is a convolutional neural network that has 3 convolutional layers and 3 dense layers. It also uses batch normalization, max pooling and dropout layers.
+The peer model is built using TensorFlow and Keras, featuring a convolutional neural network architecture with the following layers and components:
 
 ```mermaid
-
 graph TD;
     A["conv2d (Conv2D)"] --> B["batch_normalization (BatchNormalization)"]
     B --> C["max_pooling2d (MaxPooling2D)"]
@@ -39,16 +44,29 @@ graph TD;
     M --> N["dense_1 (Dense)"]
     N --> O["dense_2 (Dense)"]
     O --> P["Output Layer"]
-
-
 ```
- ### Training
 
- The model is trained with 3 dance styles and and 33 songs from each style. The model is trained with 10 epochs.
+### Training Protocol
 
+The peer model is trained on three distinct dance styles, with 33 songs per style over 25 epochs, demonstrating significant learning and adaptability to different audio characteristics.
 
-## Own model
+### Optimization
 
-The own model is documentend in [Own model documentation](OwnModel.md)
+The model is optimized using the Adam optimizer, categorical cross-entropy loss function, and a learning rate of 0.001. The model is compiled with a batch size of 32 and a validation split of 0.2. It also uses L2 regularization to prevent overfitting.
 
+## Custom Model Implementation
 
+Details on the custom model's architecture and implementation are available in [Own Model Documentation](OwnModel.md).
+
+## Results and Analysis
+
+The models were trained with 3 dance styles: Salsa, Fusku, and Waltz.
+
+- **Peer Model**: Achieved a recognition accuracy of 80%, trained over 25 epochs within 30 minutes.
+- **Own Model**: Attained a 50% accuracy rate, demonstrating slower learning with a training duration of 8 hours over 10 epochs.
+
+The comparison between the models highlights the effectiveness of using established neural network libraries and optimized model architectures in achieving higher accuracy and efficiency in dance style recognition from music.
+
+## Use of Large Language Models
+
+LLM:s were used to develop ideas, optimize the implementation, debuging and writing documentation and comments. Also tests were generated with the help of LLM:s. LLm:s helped to understand the concepts and to develop the project further. But it also included problems like generating broken code or useless tests. 
