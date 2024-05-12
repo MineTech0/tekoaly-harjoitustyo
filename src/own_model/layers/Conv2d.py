@@ -1,6 +1,8 @@
 import numpy as np
 from .BaseLayer import BaseLayer
 import scipy
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 
 class Conv2D(BaseLayer):
     def __init__(self, num_filters: int, kernel_size: int, input_shape: tuple = None, stride=1, l2_lambda=0.1):
@@ -75,21 +77,30 @@ class Conv2D(BaseLayer):
         batch_size, _, _, channels = self.cache_input.shape
         
         d_filters = np.zeros_like(self.filters)
-        d_biases = np.sum(output_gradient, axis=(0, 1, 2))  # Sum over all except the filter axis
+        d_biases = np.sum(output_gradient, axis=(0, 1, 2))
         d_input = np.zeros_like(self.cache_input)
 
-        # Using scipy.signal.correlate to compute the gradient w.r.t inputs and update gradients w.r.t filters
-        for i in range(batch_size):
-            for f in range(self.num_filters):
-                for c in range(channels):
-                    # Rotate filter by 180 degrees to convert convolution to correlation
-                    rotated_filter = np.rot90(self.filters[f, :, :, c], 2)
-                    # Computing the gradient w.r.t input
-                    d_input[i, :, :, c] += scipy.signal.correlate(output_gradient[i, :, :, f], rotated_filter, mode='full')
-                    # Updating gradient w.r.t filters
-                    d_filters[f, :, :, c] += scipy.signal.correlate(self.cache_input[i, :, :, c], output_gradient[i, :, :, f], mode='valid')
+        def process_batch(i, f, c):
+            rotated_filter = np.rot90(self.filters[f, :, :, c], 2)
+            local_d_input = scipy.signal.correlate(output_gradient[i, :, :, f], rotated_filter, mode='full')
+            local_d_filter = scipy.signal.correlate(self.cache_input[i, :, :, c], output_gradient[i, :, :, f], mode='valid')
+            return (i, f, c, local_d_input, local_d_filter)
 
-        # Updating the weights and biases
+        # Create a ThreadPoolExecutor to manage a pool of threads
+        with ThreadPoolExecutor() as executor:
+            # Submit tasks
+            futures = [executor.submit(process_batch, i, f, c) 
+                       for i in range(batch_size) 
+                       for f in range(self.num_filters) 
+                       for c in range(channels)]
+
+            # Collect results as they are completed
+            for future in as_completed(futures):
+                i, f, c, local_d_input, local_d_filter = future.result()
+                d_input[i, :, :, c] += local_d_input
+                d_filters[f, :, :, c] += local_d_filter
+
+        # Update the weights and biases
         self.filters -= learning_rate * (d_filters + self.l2_lambda * self.filters)
         self.biases -= learning_rate * d_biases
         

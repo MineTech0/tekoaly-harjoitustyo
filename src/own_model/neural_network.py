@@ -39,19 +39,16 @@ class NeuralNetwork:
         # Average over the batch
         return np.mean(loss)
 
-    def compute_loss_gradient(self, predicted_output, true_output, epsilon=1e-8):
-        # Clip predictions to ensure stability in division and log operations
-        predicted_output = np.clip(predicted_output, epsilon, 1. - epsilon)
-        # Compute gradient of the loss
-        gradient = -(true_output / predicted_output) / predicted_output.shape[0]
+    def compute_loss_gradient(self, y_predicted, y_true):
+        # Compute gradient of the cross-entropy loss
+        gradient = (y_predicted - y_true) / y_true.shape[0]  # Normalize by batch size
+    
         return gradient
-
 
     def fit(self, X_train, Y_train, epochs, learning_rate, batch_size, X_val=None, Y_val=None, save_best_only=True, filename='best_model.pkl'):
         n_samples = X_train.shape[0]
         n_batches = int(np.ceil(n_samples / batch_size))
         best_loss = float('inf')
-        clip_norm = 1.0
         total_batch_times = []
 
         print(f"Starting training with {n_samples} samples, {n_batches} batches per epoch, and batch size {batch_size}.")
@@ -76,9 +73,6 @@ class NeuralNetwork:
                 epoch_loss += loss
                 loss_gradient = self.compute_loss_gradient(predicted_output, Y_batch)
                 for layer in reversed(self.layers):
-                    gradient_norm = np.linalg.norm(loss_gradient)
-                    if gradient_norm > clip_norm:
-                        loss_gradient *= clip_norm / gradient_norm
                     loss_gradient = layer.backward(loss_gradient, learning_rate)
 
                 end_time = time.time()
@@ -92,7 +86,7 @@ class NeuralNetwork:
                     estimated_remaining_time = average_batch_time_so_far * remaining_batches
                     estimated_remaining_time_minutes = estimated_remaining_time / 60
                     print(f"Batch {i+1}/{n_batches}, Epoch {epoch+1}/{epochs}: Loss: {loss:.4f}, Accuracy: {accuracy:.4f}, Time: {batch_time:.4f} seconds")
-                    print(f"Estimated remaining training time: {estimated_remaining_time_minutes:.2f} seconds")
+                    print(f"Estimated remaining training time: {estimated_remaining_time_minutes:.2f} minutes.")
 
             epoch_loss /= n_batches
             print(f"Epoch {epoch+1} completed with average training loss {epoch_loss:.4f}.")
@@ -100,14 +94,15 @@ class NeuralNetwork:
             if X_val is not None:
                 val_predicted_output = self.predict(X_val)
                 val_loss = self.compute_loss(val_predicted_output, Y_val)
-                print(f"Validation Loss: {val_loss:.4f}")
+                val_accuracy = self.accuracy(val_predicted_output, Y_val)
+                print(f"Validation Loss: {val_loss:.4f} Validation Accuracy: {val_accuracy:.4f}")
                 if save_best_only and val_loss < best_loss:
                     best_loss = val_loss
-                    self.save(filename)
+                    self.save(f"{filename}_val_best_loss_{val_loss:.4f}_epoch_{epoch+1}.pkl")
             else:
                 if save_best_only and epoch_loss < best_loss:
                     best_loss = epoch_loss
-                    self.save(filename)
+                    self.save(f"{filename}_train_best_loss_{epoch_loss:.4f}_epoch_{epoch+1}.pkl")
 
         print("Training completed.")
 
