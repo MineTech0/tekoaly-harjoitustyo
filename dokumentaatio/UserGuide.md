@@ -55,3 +55,5 @@ poetry run invoke start
 Once the application is running, you can access it at `http://localhost:5000`. You can upload a song, and the application will predict the associated dance style. 
 
 If you want to use your own trained model, you have to replace the `own_model.pkl` file and peer model `peer_model.keras` file in the `web-app/services/models` directory.
+
+**The load method creates 18GB pickle file so it's not included in repo. You can download the zipped pickle file from [here](https://helsinkifi-my.sharepoint.com/:u:/g/personal/niilokur_ad_helsinki_fi/EVfZm8Qs1ExDmbV47-hwz9oBd5UILtEQJIDiWKMsfOpTGw?e=JCIgcS)**
